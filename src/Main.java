@@ -17,6 +17,11 @@ public class Main {
         int diff = firstNumber - secondNumber;
         System.out.println(diff);
 
+        //Выводим произведение
+        System.out.println("Произведение двух чисел:");
+        int multiply = firstNumber * secondNumber;
+        System.out.println(multiply);
+
         //Выводим частное
         System.out.println("Частное двух чисел:");
         double quotient = (double) firstNumber / secondNumber;
