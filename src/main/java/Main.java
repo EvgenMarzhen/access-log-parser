@@ -14,13 +14,12 @@ public class Main {
             boolean isDirectory = file.isDirectory();
             if(isDirectory) {
                 System.out.println("Указана папка, а не файл");
-                continue;
             } else if (!fileExists){
                 System.out.println("Файл не найден");
             }
             else {
                 countCorPath++;
-                System.out.printf("Путь указан верно %d раз\n", countCorPath);
+                System.out.printf("Путь указан верно %d раз(-a)\n", countCorPath);
             }
         }
     }
