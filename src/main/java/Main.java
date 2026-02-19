@@ -4,7 +4,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         int countCorPath = 0;
-        String path; //= "D:\\JAVALearn\\StepUp\\AccessLogParser\\access.log";
+        String path;
 
         while (true) {
             System.out.println("Укажите путь к файлу");
