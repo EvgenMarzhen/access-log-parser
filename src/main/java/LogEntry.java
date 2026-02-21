@@ -1,8 +1,5 @@
 import lombok.Getter;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.Date;
+import static java.lang.Integer.parseInt;
 
 @Getter
 public class LogEntry {
@@ -16,7 +13,7 @@ public class LogEntry {
     final Integer httpStatus;
     final Integer sizeResponse;
     final String refer;
-//    final StringBuilder userAgent;
+    final StringBuilder userAgent;
 
 
     public LogEntry(String line) {
@@ -25,24 +22,27 @@ public class LogEntry {
         this.ip = logComponents[0];
         this.someProperty1 = logComponents[1];
         this.someProperty2 = logComponents[2];
-        this.dateTime = logComponents[3] + " " + logComponents[4];
+        this.dateTime = logComponents[3];
         this.method = HttpMethods.valueOf(logComponents[5].replace("\"", ""));
         this.pathMethod = logComponents[6];
         this.httpVersion = logComponents[7].replace("\"", "");
-        this.httpStatus = Integer.parseInt(logComponents[8]);
-        this.sizeResponse =  Integer.parseInt(logComponents[9]);
+        this.httpStatus = parseInt(logComponents[8]);
+        this.sizeResponse =  parseInt(logComponents[9]);
         this.refer = logComponents[10];
-//        this.userAgent = userAgentBuild(logComponents);
+
+        if(logComponents.length > 11) {
+            this.userAgent = userAgentBuild(logComponents);
+        } else this.userAgent = new StringBuilder("-");
 
     }
 
-//    public StringBuilder userAgentBuild(String[] userAgentComponent) {
-//        StringBuilder userAgentFinal = null;
-//        for (int i = 11; i < userAgentComponent.length; i++) {
-//            userAgentFinal.append(userAgentComponent[i]).append(" ");
-//        }
-//        return userAgentFinal;
-//    }
+    public StringBuilder userAgentBuild(String[] userAgentComponents) {
+        StringBuilder userAgentFinal = new StringBuilder();
+        for (int i = 11; i < userAgentComponents.length; i++) {
+                userAgentFinal.append(userAgentComponents[i]).append(" ");
+        }
+        return userAgentFinal;
+    }
 
     @Override
     public String toString() {
@@ -57,6 +57,7 @@ public class LogEntry {
                 ", httpStatus=" + httpStatus +
                 ", sizeResponse=" + sizeResponse +
                 ", refer='" + refer + '\'' +
+                ", userAgent=" + userAgent +
                 '}';
     }
 }
