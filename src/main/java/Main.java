@@ -36,7 +36,15 @@ public class Main {
                     }
 
                     LogEntry logEntry = new LogEntry(line);
-                    System.out.println(logEntry);
+//                    System.out.println(logEntry);
+                    System.out.println(logEntry.getDateTime());
+
+                    UserAgent userAgent = new UserAgent(logEntry.getUserAgent());
+//                    System.out.println(userAgent.getBrowser());
+//                    System.out.println(userAgent.getOsType());
+//                    userAgent.printProperty(line);
+
+
 
 //                    String fragment = "";
 //

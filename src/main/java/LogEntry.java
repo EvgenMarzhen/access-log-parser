@@ -1,4 +1,8 @@
 import lombok.Getter;
+
+import java.time.LocalDateTime;
+import java.time.Month;
+
 import static java.lang.Integer.parseInt;
 
 @Getter
@@ -6,14 +10,14 @@ public class LogEntry {
     final String ip;
     final String someProperty1;
     final String someProperty2;
-    final String dateTime;
+    final LocalDateTime dateTime;
     final HttpMethods method;
     final String pathMethod;
     final String httpVersion;
     final Integer httpStatus;
     final Integer sizeResponse;
     final String refer;
-    final StringBuilder userAgent;
+    final String userAgent;
 
 
     public LogEntry(String line) {
@@ -22,41 +26,68 @@ public class LogEntry {
         this.ip = logComponents[0];
         this.someProperty1 = logComponents[1];
         this.someProperty2 = logComponents[2];
-        this.dateTime = logComponents[3];
+        this.dateTime = dateTimeBuild(logComponents[3]);
         this.method = HttpMethods.valueOf(logComponents[5].replace("\"", ""));
         this.pathMethod = logComponents[6];
         this.httpVersion = logComponents[7].replace("\"", "");
         this.httpStatus = parseInt(logComponents[8]);
         this.sizeResponse =  parseInt(logComponents[9]);
         this.refer = logComponents[10];
-
-        if(logComponents.length > 11) {
-            this.userAgent = userAgentBuild(logComponents);
-        } else this.userAgent = new StringBuilder("-");
+        this.userAgent = userAgentBuild(logComponents);
 
     }
 
-    public StringBuilder userAgentBuild(String[] userAgentComponents) {
-        StringBuilder userAgentFinal = new StringBuilder();
+    public String userAgentBuild(String[] userAgentComponents) {
+        String userAgentFinal = "";
         for (int i = 11; i < userAgentComponents.length; i++) {
-                userAgentFinal.append(userAgentComponents[i]).append(" ");
+                userAgentFinal += userAgentComponents[i] + " ";
         }
         return userAgentFinal;
+    }
+
+    public LocalDateTime dateTimeBuild(String strDT) {
+        String cleanStrDT = strDT.replace("[", "");
+        String[] componentsDT = cleanStrDT.split("[/:]");
+
+        int day = parseInt(componentsDT[0]);
+        int year = parseInt(componentsDT[2]);
+        int hour = parseInt(componentsDT[3]);
+        int minute = parseInt(componentsDT[4]);
+        int second = parseInt(componentsDT[5]);
+
+        int month = switch (componentsDT[1]) {
+            case "Jan" -> 1;
+            case "Feb" -> 2;
+            case "Mar" -> 3;
+            case "Apr" -> 4;
+            case "May" -> 5;
+            case "Jun" -> 6;
+            case "Jul" -> 7;
+            case "Aug" -> 8;
+            case "Sep" -> 9;
+            case "Oct" -> 10;
+            case "Nov" -> 11;
+            case "Dec" -> 12;
+            default -> throw new IllegalArgumentException("Неизвестный месяц при формирование даты и времени: " + strDT );
+        };
+
+        LocalDateTime localDateTime = LocalDateTime.of(year, month, day, hour, minute, second);
+        return localDateTime;
     }
 
     @Override
     public String toString() {
         return "LogEntry{" +
-                "ip='" + ip + '\'' +
-                ", someProperty1='" + someProperty1 + '\'' +
-                ", someProperty2='" + someProperty2 + '\'' +
-                ", dateTime='" + dateTime + '\'' +
+                "ip=" + ip +
+                ", someProperty1=" + someProperty1 +
+                ", someProperty2=" + someProperty2 +
+                ", dateTime=" + dateTime +
                 ", method=" + method +
-                ", pathMethod='" + pathMethod + '\'' +
-                ", httpVersion='" + httpVersion + '\'' +
+                ", pathMethod=" + pathMethod +
+                ", httpVersion=" + httpVersion +
                 ", httpStatus=" + httpStatus +
                 ", sizeResponse=" + sizeResponse +
-                ", refer='" + refer + '\'' +
+                ", refer=" + refer +
                 ", userAgent=" + userAgent +
                 '}';
     }
