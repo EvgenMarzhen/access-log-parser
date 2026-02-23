@@ -1,3 +1,5 @@
+package dictionary;
+
 public enum HttpMethods {
     GET,
     POST,

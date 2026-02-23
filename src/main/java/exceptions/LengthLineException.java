@@ -1,3 +1,5 @@
+package exceptions;
+
 public class LengthLineException extends RuntimeException{
     public LengthLineException() {
         super();

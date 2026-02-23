@@ -1,7 +1,9 @@
+package logs;
+
+import dictionary.HttpMethods;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-import java.time.Month;
 
 import static java.lang.Integer.parseInt;
 
@@ -71,13 +73,12 @@ public class LogEntry {
             default -> throw new IllegalArgumentException("Неизвестный месяц при формирование даты и времени: " + strDT );
         };
 
-        LocalDateTime localDateTime = LocalDateTime.of(year, month, day, hour, minute, second);
-        return localDateTime;
+        return LocalDateTime.of(year, month, day, hour, minute, second);
     }
 
     @Override
     public String toString() {
-        return "LogEntry{" +
+        return "logs.LogEntry{" +
                 "ip=" + ip +
                 ", someProperty1=" + someProperty1 +
                 ", someProperty2=" + someProperty2 +

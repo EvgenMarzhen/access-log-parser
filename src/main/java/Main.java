@@ -1,5 +1,8 @@
+import exceptions.LengthLineException;
+import logs.LogEntry;
+import logs.UserAgent;
+
 import java.io.*;
-import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
@@ -37,11 +40,11 @@ public class Main {
 
                     LogEntry logEntry = new LogEntry(line);
 //                    System.out.println(logEntry);
-                    System.out.println(logEntry.getDateTime());
+//                    System.out.println(logEntry.getDateTime());
 
                     UserAgent userAgent = new UserAgent(logEntry.getUserAgent());
-//                    System.out.println(userAgent.getBrowser());
-//                    System.out.println(userAgent.getOsType());
+                    System.out.print(userAgent.getBrowser() + " ");
+                    System.out.println(userAgent.getOsType());
 //                    userAgent.printProperty(line);
 
 
