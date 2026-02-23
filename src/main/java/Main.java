@@ -1,17 +1,20 @@
 import exceptions.LengthLineException;
 import logs.LogEntry;
-import logs.UserAgent;
+import monitoring.Statistics;
 
 import java.io.*;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
         int countCorPath = 0;
-        String path = "D:\\JAVALearn\\StepUp\\AccessLogParser\\access.log";
+        String path;
 
-//        while (true) {
-//            System.out.println("Укажите путь к файлу");
-//            path = new Scanner(System.in).nextLine();
+        Statistics statistics = new Statistics();
+
+        while (true) {
+            System.out.println("Укажите путь к файлу");
+            path = new Scanner(System.in).nextLine();
             File file = new File(path);
             boolean fileExists = file.exists();
             boolean isDirectory = file.isDirectory();
@@ -39,56 +42,16 @@ public class Main {
                     }
 
                     LogEntry logEntry = new LogEntry(line);
-//                    System.out.println(logEntry);
-//                    System.out.println(logEntry.getDateTime());
+                    statistics.addEntry(logEntry);
 
-                    UserAgent userAgent = new UserAgent(logEntry.getUserAgent());
-                    System.out.print(userAgent.getBrowser() + " ");
-                    System.out.println(userAgent.getOsType());
-//                    userAgent.printProperty(line);
-
-
-
-//                    String fragment = "";
-//
-//                    String[] parts = userAgent.toString().split(";");
-//                    if (parts.length >= 2) {
-//                        fragment = parts[1];
-//                    }
-//                    String cleanFragment = fragment.trim();
-//
-//                    String[] programs = cleanFragment.split("/");
-//                    String program = "";
-//
-//                    if (programs.length > 0) {
-//                        program = programs[0];
-//                    }
-//
-//                    countReq++;
-//
-//                    if (program.equalsIgnoreCase("YandexBot")) {
-//                        countYandexBot++;
-//                    }
-//
-//                    if (program.equalsIgnoreCase("GoogleBot")) {
-//                        countGoogleBot++;
-//                    }
                 }
 
-//                System.out.println("Общее число запросов: " + countReq);
-//
-//                if (countReq > 0) {
-//                    System.out.printf("Доля запросов от YandexBot: %.2f%%\n", (double) countYandexBot / countReq * 100);
-//                }
-//
-//                if (countReq > 0) {
-//                    System.out.printf("Доля запросов от GoogleBot: %.2f%%\n", (double) countGoogleBot / countReq * 100);
-//                }
-
+                System.out.println("Общий трафик: " + statistics.getTotalTraffic());
+                System.out.printf("Средний трафик в час: %.2f\n", statistics.getTrafficRate());
 
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
-//        }
+        }
     }
 }
