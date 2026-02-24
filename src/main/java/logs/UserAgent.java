@@ -74,7 +74,7 @@ public class UserAgent {
             return OS.MACINTOSH;
         }
 
-        if(userAgent.contains("Compatible")) {
+        if(userAgent.contains("compatible")) {
             return OS.COMPATIBLE;
         }
 
