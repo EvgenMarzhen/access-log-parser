@@ -1,5 +1,6 @@
 package monitoring;
 
+import dictionary.Browsers;
 import dictionary.OS;
 import logs.LogEntry;
 import logs.UserAgent;
@@ -13,6 +14,7 @@ import java.util.HashSet;
 @Getter
 public class Statistics {
     private long osTotal;
+    private long browserTotal;
     private long totalTraffic;
     private LocalDateTime minTime = LocalDateTime.MAX;
     private LocalDateTime maxTime = LocalDateTime.MIN;
@@ -20,6 +22,8 @@ public class Statistics {
     private final HashSet<String> notFoundPaths = new HashSet<>();
     private final HashMap<OS, Integer> osCounts = new HashMap<>();
     private final HashMap<OS, Double> osFractions = new HashMap<>();
+    private final HashMap<Browsers, Integer> browserCounts = new HashMap<>();
+    private final HashMap<Browsers, Double> browserFractions = new HashMap<>();
 
     public Statistics() {
     }
@@ -34,7 +38,6 @@ public class Statistics {
         if (logEntry.getDateTime().isAfter(maxTime)) {
             maxTime = logEntry.getDateTime();
         }
-
         if (logEntry.getDateTime().isBefore(minTime)) {
             minTime = logEntry.getDateTime();
         }
@@ -43,6 +46,10 @@ public class Statistics {
 
         if (userAgent.getOsType() != null) {
             updateOsStatistics(userAgent);
+        }
+
+        if (userAgent.getBrowser() != null) {
+            updateBrowserStatistics(userAgent);
         }
     }
 
@@ -75,7 +82,22 @@ public class Statistics {
         } else {
             osFractions.put(userAgent.getOsType(), 1.0 / osTotal);
         }
+    }
 
+    private void updateBrowserStatistics(UserAgent userAgent) {
+        browserTotal++;
+
+        if(browserCounts.containsKey(userAgent.getBrowser())) {
+            browserCounts.put(userAgent.getBrowser(), browserCounts.get(userAgent.getBrowser()) + 1);
+        } else {
+            browserCounts.put(userAgent.getBrowser(), 1);
+        }
+
+        if (browserFractions.containsKey(userAgent.getBrowser())) {
+            browserFractions.put(userAgent.getBrowser(), ((double) browserCounts.get(userAgent.getBrowser()) / browserTotal));
+        } else {
+            browserFractions.put(userAgent.getBrowser(), 1.0 / browserTotal);
+        }
     }
 
     public double getTrafficRate() {

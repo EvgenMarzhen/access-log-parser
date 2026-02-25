@@ -49,7 +49,7 @@ public class Main {
 
 //              Для проверки
                 System.out.println(Arrays.toString(statistics.getNotFoundPaths().toArray()));
-                System.out.println(statistics.getOsFractions());
+                System.out.println(statistics.getBrowserFractions());
 
             } catch (IOException ioException) {
                 ioException.printStackTrace();
