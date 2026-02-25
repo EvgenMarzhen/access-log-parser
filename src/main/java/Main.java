@@ -48,8 +48,8 @@ public class Main {
                 }
 
 //              Для проверки
-                System.out.println(Arrays.toString(statistics.getPaths().toArray()));
-                System.out.println(statistics.getStatOSFraction());
+                System.out.println(Arrays.toString(statistics.getNotFoundPaths().toArray()));
+                System.out.println(statistics.getOsFractions());
 
             } catch (IOException ioException) {
                 ioException.printStackTrace();

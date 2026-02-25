@@ -12,13 +12,14 @@ import java.util.HashSet;
 
 @Getter
 public class Statistics {
-    private long totalOs;
+    private long osTotal;
     private long totalTraffic;
     private LocalDateTime minTime = LocalDateTime.MAX;
     private LocalDateTime maxTime = LocalDateTime.MIN;
-    private HashSet<String> paths = new HashSet<>();
-    private HashMap<OS, Integer> statOSCount = new HashMap<>();
-    private HashMap<OS, Double> statOSFraction = new HashMap<>();
+    private final HashSet<String> successfulPaths = new HashSet<>();
+    private final HashSet<String> notFoundPaths = new HashSet<>();
+    private final HashMap<OS, Integer> osCounts = new HashMap<>();
+    private final HashMap<OS, Double> osFractions = new HashMap<>();
 
     public Statistics() {
     }
@@ -38,31 +39,41 @@ public class Statistics {
             minTime = logEntry.getDateTime();
         }
 
+        recordPathByStatus(logEntry);
+
+        if (userAgent.getOsType() != null) {
+            updateOsStatistics(userAgent);
+        }
+    }
+
+    private void recordPathByStatus(LogEntry logEntry) {
         if (logEntry.getHttpStatus() == 200) {
             if (!logEntry.getPathMethod().isEmpty()) {
-                this.paths.add(logEntry.getPathMethod());
+                this.successfulPaths.add(logEntry.getPathMethod());
             }
         }
 
-        if (userAgent.getOsType() != null) {
-            monitoringOS(userAgent);
+        if (logEntry.getHttpStatus() == 404) {
+            if (!logEntry.getPathMethod().isEmpty()) {
+                this.notFoundPaths.add(logEntry.getPathMethod());
+            }
         }
     }
 
 
-    private void monitoringOS(UserAgent userAgent) {
-        totalOs++;
+    private void updateOsStatistics(UserAgent userAgent) {
+        osTotal++;
 
-        if (statOSCount.containsKey(userAgent.getOsType())) {
-            statOSCount.put(userAgent.getOsType(), statOSCount.get(userAgent.getOsType()) + 1);
+        if (osCounts.containsKey(userAgent.getOsType())) {
+            osCounts.put(userAgent.getOsType(), osCounts.get(userAgent.getOsType()) + 1);
         } else {
-            statOSCount.put(userAgent.getOsType(), 1);
+            osCounts.put(userAgent.getOsType(), 1);
         }
 
-        if (statOSFraction.containsKey(userAgent.getOsType())) {
-            statOSFraction.put(userAgent.getOsType(), ((double) statOSCount.get(userAgent.getOsType()) / totalOs));
+        if (osFractions.containsKey(userAgent.getOsType())) {
+            osFractions.put(userAgent.getOsType(), ((double) osCounts.get(userAgent.getOsType()) / osTotal));
         } else {
-            statOSFraction.put(userAgent.getOsType(), 1.0 / totalOs);
+            osFractions.put(userAgent.getOsType(), 1.0 / osTotal);
         }
 
     }
