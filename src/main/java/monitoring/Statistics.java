@@ -12,11 +12,13 @@ import java.util.HashSet;
 
 @Getter
 public class Statistics {
-    private int totalTraffic;
+    private long totalOs;
+    private long totalTraffic;
     private LocalDateTime minTime = LocalDateTime.MAX;
     private LocalDateTime maxTime = LocalDateTime.MIN;
     private HashSet<String> paths = new HashSet<>();
-    private HashMap<OS, Integer> statisticOS  = new HashMap<>();
+    private HashMap<OS, Integer> statOSCount = new HashMap<>();
+    private HashMap<OS, Double> statOSFraction = new HashMap<>();
 
     public Statistics() {
     }
@@ -28,27 +30,41 @@ public class Statistics {
             totalTraffic += logEntry.getSizeResponse();
         }
 
-        if (logEntry.getDateTime().isAfter(getMaxTime())) {
+        if (logEntry.getDateTime().isAfter(maxTime)) {
             maxTime = logEntry.getDateTime();
         }
 
-        if (logEntry.getDateTime().isBefore(getMinTime())) {
+        if (logEntry.getDateTime().isBefore(minTime)) {
             minTime = logEntry.getDateTime();
         }
 
-        if(logEntry.getHttpStatus() == 200) {
-            if(!logEntry.getPathMethod().isEmpty()) {
+        if (logEntry.getHttpStatus() == 200) {
+            if (!logEntry.getPathMethod().isEmpty()) {
                 this.paths.add(logEntry.getPathMethod());
             }
         }
 
         if (userAgent.getOsType() != null) {
-            if(statisticOS.containsKey(userAgent.getOsType())) {
-                statisticOS.put(userAgent.getOsType(), statisticOS.get(userAgent.getOsType()) + 1);
-            } else {
-                statisticOS.put(userAgent.getOsType(), 1);
-            }
+            monitoringOS(userAgent);
         }
+    }
+
+
+    private void monitoringOS(UserAgent userAgent) {
+        totalOs++;
+
+        if (statOSCount.containsKey(userAgent.getOsType())) {
+            statOSCount.put(userAgent.getOsType(), statOSCount.get(userAgent.getOsType()) + 1);
+        } else {
+            statOSCount.put(userAgent.getOsType(), 1);
+        }
+
+        if (statOSFraction.containsKey(userAgent.getOsType())) {
+            statOSFraction.put(userAgent.getOsType(), ((double) statOSCount.get(userAgent.getOsType()) / totalOs));
+        } else {
+            statOSFraction.put(userAgent.getOsType(), 1.0 / totalOs);
+        }
+
     }
 
     public double getTrafficRate() {
