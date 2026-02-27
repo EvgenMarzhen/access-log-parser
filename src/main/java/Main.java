@@ -47,9 +47,8 @@ public class Main {
                 }
 
 //              Для проверки
-                System.out.printf("Среднее кол-во обращений от юзеров за час: %.2f\n", statistics.getAvgTrafficPerHourOfUser());
-                System.out.printf("Среднее кол-во запросов, завершившихся ошибкой за час: %.2f\n", statistics.getAvgErrorReqPerHour());
-                System.out.printf("Cредняя посещаемость одним пользователем: %.2f\n", statistics.getAvgPerIp());
+                System.out.println(statistics.getPeakRatePerSecond());
+                System.out.println(statistics.getReqPerSeconds());
 
             } catch (IOException ioException) {
                 ioException.printStackTrace();

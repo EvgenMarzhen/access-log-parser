@@ -8,17 +8,11 @@ import lombok.Getter;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.time.ZoneOffset;
+import java.util.*;
 
 @Getter
 public class Statistics {
-    private long botReqCount;
-    private long userReqCount;
-    private long reqErrorCount;
-    private long osTotal;
-    private long browserTotal;
-    private long totalTraffic;
     private final HashSet<String> successfulPaths = new HashSet<>();
     private final HashSet<String> notFoundPaths = new HashSet<>();
     private final HashSet<String> ipList = new HashSet<>();
@@ -26,6 +20,13 @@ public class Statistics {
     private final HashMap<OS, Double> osFractions = new HashMap<>();
     private final HashMap<Browsers, Integer> browserCounts = new HashMap<>();
     private final HashMap<Browsers, Double> browserFractions = new HashMap<>();
+    private final HashMap<Long, Integer> reqPerSeconds = new HashMap<>();
+    private long botReqCount;
+    private long userReqCount;
+    private long reqErrorCount;
+    private long osTotal;
+    private long browserTotal;
+    private long totalTraffic;
     private LocalDateTime minTime = LocalDateTime.MAX;
     private LocalDateTime maxTime = LocalDateTime.MIN;
 
@@ -39,12 +40,7 @@ public class Statistics {
             totalTraffic += logEntry.getSizeResponse();
         }
 
-        if (logEntry.getDateTime().isAfter(maxTime)) {
-            maxTime = logEntry.getDateTime();
-        }
-        if (logEntry.getDateTime().isBefore(minTime)) {
-            minTime = logEntry.getDateTime();
-        }
+        updateTimeRange(logEntry.getDateTime());
 
         if (!userAgent.isBot()) {
             userReqCount++;
@@ -53,7 +49,7 @@ public class Statistics {
             botReqCount++;
         }
 
-        if (logEntry.getHttpStatus() >= 400 && logEntry.getHttpStatus() <= 500) {
+        if (isErrorStatus(logEntry.getHttpStatus())) {
             reqErrorCount++;
         }
 
@@ -67,6 +63,23 @@ public class Statistics {
 
         recordPathByStatus(logEntry);
 
+        if (!userAgent.isBot()) {
+            updatePeakRate(logEntry);
+        }
+
+    }
+
+    private void updateTimeRange(LocalDateTime dateTime) {
+        if (dateTime.isAfter(maxTime)) {
+            maxTime = dateTime;
+        }
+        if (dateTime.isBefore(minTime)) {
+            minTime = dateTime;
+        }
+    }
+
+    private boolean isErrorStatus(int status) {
+        return status >= 400 && status <= 599;
     }
 
     private void recordPathByStatus(LogEntry logEntry) {
@@ -83,37 +96,52 @@ public class Statistics {
         }
     }
 
-
     private void updateOsStatistics(UserAgent userAgent) {
         osTotal++;
+        OS os = userAgent.getOsType();
 
-        if (osCounts.containsKey(userAgent.getOsType())) {
-            osCounts.put(userAgent.getOsType(), osCounts.get(userAgent.getOsType()) + 1);
+        if (osCounts.containsKey(os)) {
+            osCounts.put(os, osCounts.get(os) + 1);
         } else {
-            osCounts.put(userAgent.getOsType(), 1);
+            osCounts.put(os, 1);
         }
 
-        if (osFractions.containsKey(userAgent.getOsType())) {
-            osFractions.put(userAgent.getOsType(), ((double) osCounts.get(userAgent.getOsType()) / osTotal));
+        if (osFractions.containsKey(os)) {
+            osFractions.put(os, ((double) osCounts.get(os) / osTotal));
         } else {
-            osFractions.put(userAgent.getOsType(), 1.0 / osTotal);
+            osFractions.put(os, 1.0 / osTotal);
         }
     }
 
     private void updateBrowserStatistics(UserAgent userAgent) {
         browserTotal++;
+        Browsers browser = userAgent.getBrowser();
 
-        if (browserCounts.containsKey(userAgent.getBrowser())) {
-            browserCounts.put(userAgent.getBrowser(), browserCounts.get(userAgent.getBrowser()) + 1);
+        if (browserCounts.containsKey(browser)) {
+            browserCounts.put(browser, browserCounts.get(browser) + 1);
         } else {
-            browserCounts.put(userAgent.getBrowser(), 1);
+            browserCounts.put(browser, 1);
         }
 
-        if (browserFractions.containsKey(userAgent.getBrowser())) {
-            browserFractions.put(userAgent.getBrowser(), ((double) browserCounts.get(userAgent.getBrowser()) / browserTotal));
+        if (browserFractions.containsKey(browser)) {
+            browserFractions.put(browser, ((double) browserCounts.get(browser) / browserTotal));
         } else {
-            browserFractions.put(userAgent.getBrowser(), 1.0 / browserTotal);
+            browserFractions.put(browser, 1.0 / browserTotal);
         }
+    }
+
+    public void updatePeakRate(LogEntry logEntry) {
+        Long currentSecond = logEntry.getDateTime().toEpochSecond(ZoneOffset.UTC);
+
+        if (reqPerSeconds.containsKey(currentSecond)) {
+            reqPerSeconds.put(currentSecond, reqPerSeconds.get(currentSecond) + 1);
+        } else {
+           reqPerSeconds.put(currentSecond, 1);
+        }
+    }
+
+    public Integer getPeakRatePerSecond() {
+       return reqPerSeconds.values().stream().max((a, b) -> a.compareTo(b)).orElse(0);
     }
 
     public double getTrafficRate() {
@@ -146,5 +174,4 @@ public class Statistics {
     public double getAvgPerIp() {
         return (double) userReqCount / ipList.size();
     }
-
 }
