@@ -80,4 +80,8 @@ public class UserAgent {
 
         return OS.UNDEFINED;
     }
+
+    public boolean isBot() {
+        return browser == Browsers.BOT;
+    }
 }

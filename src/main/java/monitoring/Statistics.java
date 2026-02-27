@@ -13,17 +13,21 @@ import java.util.HashSet;
 
 @Getter
 public class Statistics {
+    private long botReqCount;
+    private long userReqCount;
+    private long reqErrorCount;
     private long osTotal;
     private long browserTotal;
     private long totalTraffic;
-    private LocalDateTime minTime = LocalDateTime.MAX;
-    private LocalDateTime maxTime = LocalDateTime.MIN;
     private final HashSet<String> successfulPaths = new HashSet<>();
     private final HashSet<String> notFoundPaths = new HashSet<>();
+    private final HashSet<String> ipList = new HashSet<>();
     private final HashMap<OS, Integer> osCounts = new HashMap<>();
     private final HashMap<OS, Double> osFractions = new HashMap<>();
     private final HashMap<Browsers, Integer> browserCounts = new HashMap<>();
     private final HashMap<Browsers, Double> browserFractions = new HashMap<>();
+    private LocalDateTime minTime = LocalDateTime.MAX;
+    private LocalDateTime maxTime = LocalDateTime.MIN;
 
     public Statistics() {
     }
@@ -42,7 +46,16 @@ public class Statistics {
             minTime = logEntry.getDateTime();
         }
 
-        recordPathByStatus(logEntry);
+        if (!userAgent.isBot()) {
+            userReqCount++;
+            ipList.add(logEntry.getIp());
+        } else {
+            botReqCount++;
+        }
+
+        if (logEntry.getHttpStatus() >= 400 && logEntry.getHttpStatus() <= 500) {
+            reqErrorCount++;
+        }
 
         if (userAgent.getOsType() != null) {
             updateOsStatistics(userAgent);
@@ -51,6 +64,9 @@ public class Statistics {
         if (userAgent.getBrowser() != null) {
             updateBrowserStatistics(userAgent);
         }
+
+        recordPathByStatus(logEntry);
+
     }
 
     private void recordPathByStatus(LogEntry logEntry) {
@@ -87,7 +103,7 @@ public class Statistics {
     private void updateBrowserStatistics(UserAgent userAgent) {
         browserTotal++;
 
-        if(browserCounts.containsKey(userAgent.getBrowser())) {
+        if (browserCounts.containsKey(userAgent.getBrowser())) {
             browserCounts.put(userAgent.getBrowser(), browserCounts.get(userAgent.getBrowser()) + 1);
         } else {
             browserCounts.put(userAgent.getBrowser(), 1);
@@ -108,4 +124,27 @@ public class Statistics {
         double diffHours = diffSeconds / 3600.0;
         return totalTraffic / diffHours;
     }
+
+    public double getAvgTrafficPerHourOfUser() {
+        if (minTime.equals(maxTime)) {
+            return 0.0;
+        }
+        long diffSeconds = Duration.between(minTime, maxTime).getSeconds();
+        double diffHours = diffSeconds / 3600.0;
+        return userReqCount / diffHours;
+    }
+
+    public double getAvgErrorReqPerHour() {
+        if (minTime.equals(maxTime)) {
+            return 0.0;
+        }
+        long diffSeconds = Duration.between(minTime, maxTime).getSeconds();
+        double diffHours = diffSeconds / 3600.0;
+        return reqErrorCount / diffHours;
+    }
+
+    public double getAvgPerIp() {
+        return (double) userReqCount / ipList.size();
+    }
+
 }

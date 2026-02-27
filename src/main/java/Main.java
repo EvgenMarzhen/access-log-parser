@@ -3,7 +3,6 @@ import logs.LogEntry;
 import monitoring.Statistics;
 
 import java.io.*;
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
@@ -48,8 +47,9 @@ public class Main {
                 }
 
 //              Для проверки
-                System.out.println(Arrays.toString(statistics.getNotFoundPaths().toArray()));
-                System.out.println(statistics.getBrowserFractions());
+                System.out.printf("Среднее кол-во обращений от юзеров за час: %.2f\n", statistics.getAvgTrafficPerHourOfUser());
+                System.out.printf("Среднее кол-во запросов, завершившихся ошибкой за час: %.2f\n", statistics.getAvgErrorReqPerHour());
+                System.out.printf("Cредняя посещаемость одним пользователем: %.2f\n", statistics.getAvgPerIp());
 
             } catch (IOException ioException) {
                 ioException.printStackTrace();
