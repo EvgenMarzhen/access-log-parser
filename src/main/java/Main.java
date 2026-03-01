@@ -40,19 +40,18 @@ public class Main {
                     if (line.length() > 1024) {
                         throw new LengthLineException("Строка не должна быть длиннее 1024 символов");
                     }
-
                     LogEntry logEntry = new LogEntry(line);
                     statistics.addEntry(logEntry);
-
-                    System.out.println(logEntry.getRefer());
-
                 }
+
 
 //              Для проверки
 //                System.out.println(statistics.getPeakRatePerSecond());
 //                System.out.println(statistics.getReqPerSeconds());
 //                System.out.println(statistics.getSiteList());
-                System.out.println(statistics.getDomainList());
+//                System.out.println(statistics.getDomainList());
+//                System.out.println(statistics.getCountReqByIp());
+//                System.out.println(statistics.getMaxReq());
 
             } catch (IOException ioException) {
                 ioException.printStackTrace();

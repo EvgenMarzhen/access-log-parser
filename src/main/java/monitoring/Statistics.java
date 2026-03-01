@@ -5,17 +5,10 @@ import dictionary.OS;
 import logs.LogEntry;
 import logs.UserAgent;
 import lombok.Getter;
-
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Getter
 public class Statistics {
@@ -25,6 +18,7 @@ public class Statistics {
     private final HashSet<String> siteList = new HashSet<>();
     private final HashSet<String> domainList = new HashSet<>();
     private final HashMap<OS, Integer> osCounts = new HashMap<>();
+    private final HashMap<String, Integer> countReqByIp = new HashMap<>();
     private final HashMap<OS, Double> osFractions = new HashMap<>();
     private final HashMap<Browsers, Integer> browserCounts = new HashMap<>();
     private final HashMap<Browsers, Double> browserFractions = new HashMap<>();
@@ -52,6 +46,7 @@ public class Statistics {
             userReqCount++;
             ipList.add(logEntry.getIp());
             updatePeakRate(logEntry);
+            updateUserStatistics(logEntry);
         } else {
             botReqCount++;
         }
@@ -74,8 +69,6 @@ public class Statistics {
             updateReferStatistics(logEntry);
         }
 
-        updateReferStatistics(logEntry);
-
     }
 
 
@@ -85,6 +78,19 @@ public class Statistics {
         }
         if (dateTime.isBefore(minTime)) {
             minTime = dateTime;
+        }
+    }
+
+    private void updateUserStatistics(LogEntry logEntry) {
+        UserAgent userAgent = new UserAgent(logEntry.getUserAgent());
+        String ip = logEntry.getIp();
+
+        if(!userAgent.isBot()) {
+            if(countReqByIp.containsKey(ip)) {
+                countReqByIp.put(ip, countReqByIp.get(ip) + 1);
+            } else {
+                countReqByIp.put(ip, 1);
+            }
         }
     }
 
@@ -199,15 +205,19 @@ public class Statistics {
     public String extractDomain(String site) {
         if (site.equals("-")) return "-";
 
-        // Просто удаляем https://
         String afterProtocol = site.replace("https://", "").replace("http://", "");
 
-        // Берем все до первого слеша
         int slashIndex = afterProtocol.indexOf('/');
         if (slashIndex != -1) {
             return afterProtocol.substring(0, slashIndex);
         }
 
         return afterProtocol;
+    }
+
+    public int getMaxReq() {
+        return countReqByIp.values().stream()
+                .max(Comparator.naturalOrder())
+                .orElse(0);
     }
 }
