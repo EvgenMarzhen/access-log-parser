@@ -44,11 +44,15 @@ public class Main {
                     LogEntry logEntry = new LogEntry(line);
                     statistics.addEntry(logEntry);
 
+                    System.out.println(logEntry.getRefer());
+
                 }
 
 //              Для проверки
-                System.out.println(statistics.getPeakRatePerSecond());
-                System.out.println(statistics.getReqPerSeconds());
+//                System.out.println(statistics.getPeakRatePerSecond());
+//                System.out.println(statistics.getReqPerSeconds());
+//                System.out.println(statistics.getSiteList());
+                System.out.println(statistics.getDomainList());
 
             } catch (IOException ioException) {
                 ioException.printStackTrace();

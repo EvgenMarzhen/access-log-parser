@@ -6,16 +6,24 @@ import logs.LogEntry;
 import logs.UserAgent;
 import lombok.Getter;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Getter
 public class Statistics {
     private final HashSet<String> successfulPaths = new HashSet<>();
     private final HashSet<String> notFoundPaths = new HashSet<>();
     private final HashSet<String> ipList = new HashSet<>();
+    private final HashSet<String> siteList = new HashSet<>();
+    private final HashSet<String> domainList = new HashSet<>();
     private final HashMap<OS, Integer> osCounts = new HashMap<>();
     private final HashMap<OS, Double> osFractions = new HashMap<>();
     private final HashMap<Browsers, Integer> browserCounts = new HashMap<>();
@@ -30,8 +38,6 @@ public class Statistics {
     private LocalDateTime minTime = LocalDateTime.MAX;
     private LocalDateTime maxTime = LocalDateTime.MIN;
 
-    public Statistics() {
-    }
 
     public void addEntry(LogEntry logEntry) {
         UserAgent userAgent = new UserAgent(logEntry.getUserAgent());
@@ -45,11 +51,12 @@ public class Statistics {
         if (!userAgent.isBot()) {
             userReqCount++;
             ipList.add(logEntry.getIp());
+            updatePeakRate(logEntry);
         } else {
             botReqCount++;
         }
 
-        if (isErrorStatus(logEntry.getHttpStatus())) {
+        if (isError(logEntry.getHttpStatus())) {
             reqErrorCount++;
         }
 
@@ -63,11 +70,14 @@ public class Statistics {
 
         recordPathByStatus(logEntry);
 
-        if (!userAgent.isBot()) {
-            updatePeakRate(logEntry);
+        if (!(logEntry.getRefer().equals("-") || logEntry.getRefer().isEmpty())) {
+            updateReferStatistics(logEntry);
         }
 
+        updateReferStatistics(logEntry);
+
     }
+
 
     private void updateTimeRange(LocalDateTime dateTime) {
         if (dateTime.isAfter(maxTime)) {
@@ -75,24 +85,6 @@ public class Statistics {
         }
         if (dateTime.isBefore(minTime)) {
             minTime = dateTime;
-        }
-    }
-
-    private boolean isErrorStatus(int status) {
-        return status >= 400 && status <= 599;
-    }
-
-    private void recordPathByStatus(LogEntry logEntry) {
-        if (logEntry.getHttpStatus() == 200) {
-            if (!logEntry.getPathMethod().isEmpty()) {
-                this.successfulPaths.add(logEntry.getPathMethod());
-            }
-        }
-
-        if (logEntry.getHttpStatus() == 404) {
-            if (!logEntry.getPathMethod().isEmpty()) {
-                this.notFoundPaths.add(logEntry.getPathMethod());
-            }
         }
     }
 
@@ -136,12 +128,32 @@ public class Statistics {
         if (reqPerSeconds.containsKey(currentSecond)) {
             reqPerSeconds.put(currentSecond, reqPerSeconds.get(currentSecond) + 1);
         } else {
-           reqPerSeconds.put(currentSecond, 1);
+            reqPerSeconds.put(currentSecond, 1);
         }
     }
 
+
+    private boolean isError(int status) {
+        return status >= 400 && status <= 599;
+    }
+
+    private void recordPathByStatus(LogEntry logEntry) {
+        if (logEntry.getHttpStatus() == 200) {
+            if (!logEntry.getPathMethod().isEmpty()) {
+                this.successfulPaths.add(logEntry.getPathMethod());
+            }
+        }
+
+        if (logEntry.getHttpStatus() == 404) {
+            if (!logEntry.getPathMethod().isEmpty()) {
+                this.notFoundPaths.add(logEntry.getPathMethod());
+            }
+        }
+    }
+
+
     public Integer getPeakRatePerSecond() {
-       return reqPerSeconds.values().stream().max((a, b) -> a.compareTo(b)).orElse(0);
+        return reqPerSeconds.values().stream().max((a, b) -> a.compareTo(b)).orElse(0);
     }
 
     public double getTrafficRate() {
@@ -173,5 +185,29 @@ public class Statistics {
 
     public double getAvgPerIp() {
         return (double) userReqCount / ipList.size();
+    }
+
+    private void updateReferStatistics(LogEntry logEntry) {
+        siteList.add(logEntry.getRefer());
+
+        String domain = extractDomain(logEntry.getRefer());
+        if (!domain.equals("-")) {
+            domainList.add(domain);
+        }
+    }
+
+    public String extractDomain(String site) {
+        if (site.equals("-")) return "-";
+
+        // Просто удаляем https://
+        String afterProtocol = site.replace("https://", "").replace("http://", "");
+
+        // Берем все до первого слеша
+        int slashIndex = afterProtocol.indexOf('/');
+        if (slashIndex != -1) {
+            return afterProtocol.substring(0, slashIndex);
+        }
+
+        return afterProtocol;
     }
 }
