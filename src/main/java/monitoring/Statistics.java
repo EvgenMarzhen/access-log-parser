@@ -9,20 +9,21 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.function.Consumer;
 
 @Getter
 public class Statistics {
-    private final HashSet<String> successfulPaths = new HashSet<>();
-    private final HashSet<String> notFoundPaths = new HashSet<>();
-    private final HashSet<String> ipList = new HashSet<>();
-    private final HashSet<String> siteList = new HashSet<>();
-    private final HashSet<String> domainList = new HashSet<>();
-    private final HashMap<OS, Integer> osCounts = new HashMap<>();
-    private final HashMap<String, Integer> countReqByIp = new HashMap<>();
-    private final HashMap<OS, Double> osFractions = new HashMap<>();
-    private final HashMap<Browsers, Integer> browserCounts = new HashMap<>();
-    private final HashMap<Browsers, Double> browserFractions = new HashMap<>();
-    private final HashMap<Long, Integer> reqPerSeconds = new HashMap<>();
+    private final Set<String> successfulPaths = new HashSet<>();
+    private final Set<String> notFoundPaths = new HashSet<>();
+    private final Set<String> ipList = new HashSet<>();
+    private final Set<String> siteList = new HashSet<>();
+    private final Set<String> domainList = new HashSet<>();
+    private final Map<OS, Integer> osCounts = new HashMap<>();
+    private final Map<String, Integer> countReqByIp = new HashMap<>();
+    private final Map<OS, Double> osFractions = new HashMap<>();
+    private final Map<Browsers, Integer> browserCounts = new HashMap<>();
+    private final Map<Browsers, Double> browserFractions = new HashMap<>();
+    private final Map<Long, Integer> reqPerSeconds = new HashMap<>();
     private long botReqCount;
     private long userReqCount;
     private long reqErrorCount;
@@ -103,12 +104,6 @@ public class Statistics {
         } else {
             osCounts.put(os, 1);
         }
-
-        if (osFractions.containsKey(os)) {
-            osFractions.put(os, ((double) osCounts.get(os) / osTotal));
-        } else {
-            osFractions.put(os, 1.0 / osTotal);
-        }
     }
 
     private void updateBrowserStatistics(UserAgent userAgent) {
@@ -120,12 +115,17 @@ public class Statistics {
         } else {
             browserCounts.put(browser, 1);
         }
+    }
 
-        if (browserFractions.containsKey(browser)) {
-            browserFractions.put(browser, ((double) browserCounts.get(browser) / browserTotal));
-        } else {
-            browserFractions.put(browser, 1.0 / browserTotal);
-        }
+    public void getFractionByOS() {
+
+        double total = osCounts.get(OS.WINDOWS) + osCounts.get(OS.LINUX) + osCounts.get(OS.MACINTOSH);
+
+        osFractions.put(OS.LINUX, osCounts.getOrDefault(OS.LINUX, 0).doubleValue() / total);
+        osFractions.put(OS.WINDOWS, osCounts.getOrDefault(OS.WINDOWS, 0).doubleValue() / total);
+        osFractions.put(OS.MACINTOSH, osCounts.getOrDefault(OS.MACINTOSH, 0).doubleValue() / total);
+
+        System.out.println(osFractions);
     }
 
     public void updatePeakRate(LogEntry logEntry) {

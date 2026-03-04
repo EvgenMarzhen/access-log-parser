@@ -3,6 +3,7 @@ import logs.LogEntry;
 import monitoring.Statistics;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
@@ -27,7 +28,6 @@ public class Main {
                 System.out.println("Файл не найден");
             } else {
                 countCorPath++;
-                System.out.printf("Путь указан верно %d раз(-a)\n", countCorPath);
             }
 
             try {
@@ -43,15 +43,16 @@ public class Main {
                     LogEntry logEntry = new LogEntry(line);
                     statistics.addEntry(logEntry);
                 }
+                statistics.getFractionByOS();
+//       ============================================
+                //Проверка, что сложение долей даст 1.0
+//       ============================================
+                double sum = 0.0;
+                for (Double frac : statistics.getOsFractions().values()) {
+                    sum += frac;
+                }
 
-
-//              Для проверки
-//                System.out.println(statistics.getPeakRatePerSecond());
-//                System.out.println(statistics.getReqPerSeconds());
-//                System.out.println(statistics.getSiteList());
-//                System.out.println(statistics.getDomainList());
-//                System.out.println(statistics.getCountReqByIp());
-//                System.out.println(statistics.getMaxReq());
+                System.out.println(sum);
 
             } catch (IOException ioException) {
                 ioException.printStackTrace();

@@ -9,17 +9,17 @@ import static java.lang.Integer.parseInt;
 
 @Getter
 public class LogEntry {
-    final String ip;
-    final String someProperty1;
-    final String someProperty2;
-    final LocalDateTime dateTime;
-    final HttpMethods method;
-    final String pathMethod;
-    final String httpVersion;
-    final Integer httpStatus;
-    final Integer sizeResponse;
-    final String refer;
-    final String userAgent;
+    private final String ip;
+    private final String someProperty1;
+    private final String someProperty2;
+    private final LocalDateTime dateTime;
+    private final HttpMethods method;
+    private final String pathMethod;
+    private final String httpVersion;
+    private final Integer httpStatus;
+    private final Integer sizeResponse;
+    private final String refer;
+    private final String userAgent;
 
 
     public LogEntry(String line) {
