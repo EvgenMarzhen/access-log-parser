@@ -43,12 +43,13 @@ public class Main {
                     LogEntry logEntry = new LogEntry(line);
                     statistics.addEntry(logEntry);
                 }
-                statistics.getFractionByOS();
-//       ============================================
-                //Проверка, что сложение долей даст 1.0
+
+                statistics.getFractionByBrowser();
+//       ===========================================
+//         Проверка, что сложение долей даст 1.0
 //       ============================================
                 double sum = 0.0;
-                for (Double frac : statistics.getOsFractions().values()) {
+                for (Double frac : statistics.getBrowserFractions().values()) {
                     sum += frac;
                 }
 

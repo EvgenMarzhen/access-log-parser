@@ -128,6 +128,21 @@ public class Statistics {
         System.out.println(osFractions);
     }
 
+    public void getFractionByBrowser() {
+
+        double total = browserCounts.getOrDefault(Browsers.CHROME, 0) + browserCounts.getOrDefault(Browsers.OPERA, 0) +
+                browserCounts.getOrDefault(Browsers.FIREFOX, 0) + browserCounts.getOrDefault(Browsers.SAFARI, 0) +
+                browserCounts.getOrDefault(Browsers.EDGE, 0);
+
+        browserFractions.put(Browsers.CHROME, browserCounts.getOrDefault(Browsers.CHROME, 0).doubleValue() / total);
+        browserFractions.put(Browsers.OPERA, browserCounts.getOrDefault(Browsers.OPERA, 0).doubleValue() / total);
+        browserFractions.put(Browsers.FIREFOX, browserCounts.getOrDefault(Browsers.FIREFOX, 0).doubleValue() / total);
+        browserFractions.put(Browsers.SAFARI, browserCounts.getOrDefault(Browsers.SAFARI, 0).doubleValue() / total);
+        browserFractions.put(Browsers.EDGE, browserCounts.getOrDefault(Browsers.EDGE, 0).doubleValue() / total);
+
+        System.out.println(browserFractions);
+    }
+
     public void updatePeakRate(LogEntry logEntry) {
         Long currentSecond = logEntry.getDateTime().toEpochSecond(ZoneOffset.UTC);
 
